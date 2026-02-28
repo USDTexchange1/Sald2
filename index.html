@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAL2-CRYPTO</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:linear-gradient(135deg,#0f172a,#020617);
+color:white;
+}
+.container{
+max-width:500px;
+margin:auto;
+padding:20px;
+}
+h1{
+text-align:center;
+color:#00ffcc;
+}
+.card{
+background:#1e293b;
+padding:15px;
+border-radius:12px;
+margin-bottom:15px;
+box-shadow:0 0 10px rgba(0,255,204,0.2);
+}
+input,button{
+width:100%;
+padding:10px;
+margin-top:8px;
+border-radius:8px;
+border:none;
+font-size:15px;
+}
+button{
+background:#00ffcc;
+font-weight:bold;
+cursor:pointer;
+transition:0.3s;
+}
+button:hover{
+background:#00ccaa;
+}
+.promo{
+background:#0ea5e9;
+padding:8px;
+margin:5px 0;
+border-radius:8px;
+cursor:pointer;
+text-align:center;
+transition:0.3s;
+}
+.promo:hover{
+background:#0284c7;
+}
+.status{
+text-align:center;
+font-weight:bold;
+margin-top:10px;
+}
+.admin{
+display:none;
+background:#111827;
+padding:10px;
+border-radius:10px;
+}
+.small{
+font-size:13px;
+opacity:0.8;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>SAL2-CRYPTO</h1>
+
+<div class="card">
+<label>Número</label>
+<input type="text" id="telefono" placeholder="535xxxxxxx">
+</div>
+
+<div class="card">
+<h3>Promociones</h3>
+
+<div class="promo" onclick="setPromo(0.8,120)">0.8 USDT → 120 CUP</div>
+<div class="promo" onclick="setPromo(1.6,240)">1.6 USDT → 240 CUP</div>
+<div class="promo" onclick="setPromo(2.4,360)">2.4 USDT → 360 CUP</div>
+<div class="promo" onclick="setPromo(5,'15GB')">5 USDT → 15 GB</div>
+
+<hr>
+
+<div class="promo" onclick="setPromo(3,500)">🔥 3 → 500 CUP</div>
+<div class="promo" onclick="setPromo(6,1200)">🚀 6 → 1200 CUP</div>
+<div class="promo" onclick="setPromo(10,2500)">💎 10 → 2500 CUP</div>
+<div class="promo" onclick="setPromo(8,'25GB')">📶 8 → 25 GB</div>
+<div class="promo" onclick="setPromo(12,'45GB')">📡 12 → 45 GB</div>
+<div class="promo" onclick="setPromo(20,'6000 CUP + 10GB')">🎁 20 → 6000 CUP + 10GB</div>
+
+</div>
+
+<div class="card">
+<label>USDT</label>
+<input type="number" id="usdt" oninput="convertir()" placeholder="Cantidad">
+<label>Recibirás</label>
+<input type="text" id="recibir" readonly>
+</div>
+
+<div class="card">
+<label>Hash BEP20</label>
+<input type="text" id="hash" placeholder="0x...">
+<button onclick="validarOrden()">Validar Hash</button>
+<div class="status" id="estado"></div>
+</div>
+
+<div class="card">
+<label>Código Activación</label>
+<input type="text" id="codigo">
+<button onclick="activar()">Activar</button>
+</div>
+
+<div class="card small">
+Ventas Totales: <span id="ventas">0</span><br>
+Códigos Disponibles: <span id="disponibles">30</span>
+</div>
+
+<div class="card">
+<h3>Historial</h3>
+<div id="historial"></div>
+</div>
+
+<div class="card">
+<button onclick="abrirAdmin()">Panel Admin</button>
+<div class="admin" id="adminPanel">
+<h4>Administrador</h4>
+<button onclick="resetear()">Resetear Sistema</button>
+</div>
+</div>
+
+</div>
+
+<script>
+const tasa = 150;
+
+const codigos = [
+"48291","59382","73920","18475","92037","67481","31859","45092","76104","89231",
+"30918","54721","68294","95107","28463","74018","19642","82357","61029","45873",
+"72916","30584","86420","94751","23190","67832","54017","81263","39485","15970"
+];
+
+let usados = JSON.parse(localStorage.getItem("usados")) || [];
+let hashesUsados = JSON.parse(localStorage.getItem("hashesUsados")) || [];
+let ventas = JSON.parse(localStorage.getItem("ventas")) || 0;
+
+function setPromo(usdt,valor){
+document.getElementById("usdt").value=usdt;
+document.getElementById("recibir").value=valor;
+invalidarHash();
+}
+
+function convertir(){
+let u=document.getElementById("usdt").value;
+if(u){
+document.getElementById("recibir").value=(u*tasa)+" CUP";
+invalidarHash();
+}
+}
+
+// 🔒 INVALIDA HASH SI CAMBIA MONTO
+function invalidarHash(){
+if(localStorage.getItem("hashValidado")){
+localStorage.removeItem("hashValidado");
+localStorage.removeItem("montoValidado");
+document.getElementById("estado").innerHTML="⚠ Monto cambiado, vuelve a validar hash";
+document.getElementById("estado").style.color="orange";
+}
+}
+
+function validarOrden(){
+let hash = document.getElementById("hash").value.trim();
+let monto = document.getElementById("usdt").value;
+let estado = document.getElementById("estado");
+let formatoHash = /^0x[a-fA-F0-9]{64}$/;
+
+if(!monto){
+estado.innerHTML="❌ Ingresa monto primero";
+estado.style.color="red";
+return;
+}
+
+if(!hash){
+estado.innerHTML="❌ Introduce el hash";
+estado.style.color="red";
+return;
+}
+
+if(!formatoHash.test(hash)){
+estado.innerHTML="❌ Hash incorrecto";
+estado.style.color="red";
+return;
+}
+
+if(hashesUsados.includes(hash)){
+estado.innerHTML="❌ Hash ya utilizado";
+estado.style.color="red";
+return;
+}
+
+estado.innerHTML="⏳ Verificando formato...";
+estado.style.color="orange";
+
+setTimeout(()=>{
+estado.innerHTML="✅ Hash válido y monto bloqueado";
+estado.style.color="#00ffcc";
+
+localStorage.setItem("hashValidado",hash);
+localStorage.setItem("montoValidado",monto);
+
+},1500);
+}
+
+function activar(){
+let hashGuardado = localStorage.getItem("hashValidado");
+let montoGuardado = localStorage.getItem("montoValidado");
+let montoActual = document.getElementById("usdt").value;
+
+if(!hashGuardado){
+alert("Primero valida un hash correcto");
+return;
+}
+
+if(montoGuardado !== montoActual){
+alert("El monto fue modificado. Vuelve a validar.");
+invalidarHash();
+return;
+}
+
+let codigo=document.getElementById("codigo").value;
+
+if(usados.includes(codigo)){
+alert("Código ya usado");
+return;
+}
+
+if(codigos.includes(codigo)){
+usados.push(codigo);
+hashesUsados.push(hashGuardado);
+
+localStorage.setItem("usados",JSON.stringify(usados));
+localStorage.setItem("hashesUsados",JSON.stringify(hashesUsados));
+
+ventas++;
+localStorage.setItem("ventas",ventas);
+
+localStorage.removeItem("hashValidado");
+localStorage.removeItem("montoValidado");
+
+guardarHistorial();
+actualizarPanel();
+
+alert("Recarga Activada");
+}else{
+alert("Código inválido");
+}
+}
+
+function guardarHistorial(){
+let telefono=document.getElementById("telefono").value;
+let recibir=document.getElementById("recibir").value;
+let historial=JSON.parse(localStorage.getItem("historial"))||[];
+
+historial.push({
+telefono,
+recibir,
+fecha:new Date().toLocaleString()
+});
+
+localStorage.setItem("historial",JSON.stringify(historial));
+mostrarHistorial();
+}
+
+function mostrarHistorial(){
+let historial=JSON.parse(localStorage.getItem("historial"))||[];
+let html="";
+historial.forEach(h=>{
+html+=`<p>${h.fecha} | ${h.telefono} | ${h.recibir}</p>`;
+});
+document.getElementById("historial").innerHTML=html;
+}
+
+function actualizarPanel(){
+document.getElementById("ventas").innerHTML=ventas;
+document.getElementById("disponibles").innerHTML=codigos.length-usados.length;
+}
+
+// 🔐 PANEL ADMIN CON CONTRASEÑA
+function abrirAdmin(){
+let pass = prompt("Introduce la contraseña del panel admin:");
+if(pass === "daryallen99@gmail.com"){
+document.getElementById("adminPanel").style.display="block";
+}else{
+alert("Contraseña incorrecta");
+}
+}
+
+function resetear(){
+localStorage.clear();
+location.reload();
+}
+
+mostrarHistorial();
+actualizarPanel();
+
+</script>
+
+</body>
+</html>
