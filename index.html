@@ -4,81 +4,87 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SAL2-CRYPTO</title>
-
 <style>
 body{
-margin:0;
-font-family:Arial, sans-serif;
-background:linear-gradient(135deg,#0f172a,#020617);
-color:white;
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:linear-gradient(135deg,#0f172a,#020617);
+  color:white;
 }
 .container{
-max-width:500px;
-margin:auto;
-padding:20px;
+  max-width:500px;
+  margin:auto;
+  padding:20px;
 }
 h1{
-text-align:center;
-color:#00ffcc;
+  text-align:center;
+  color:#00ffcc;
 }
 .card{
-background:#1e293b;
-padding:15px;
-border-radius:12px;
-margin-bottom:15px;
-box-shadow:0 0 10px rgba(0,255,204,0.2);
+  background:#1e293b;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  box-shadow:0 0 10px rgba(0,255,204,0.2);
 }
 input,button{
-width:100%;
-padding:10px;
-margin-top:8px;
-border-radius:8px;
-border:none;
-font-size:15px;
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  border-radius:8px;
+  border:none;
+  font-size:15px;
 }
 button{
-background:#00ffcc;
-font-weight:bold;
-cursor:pointer;
-transition:0.3s;
+  background:#00ffcc;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
 }
 button:hover{
-background:#00ccaa;
+  background:#00ccaa;
 }
 .promo{
-background:#0ea5e9;
-padding:8px;
-margin:5px 0;
-border-radius:8px;
-cursor:pointer;
-text-align:center;
-transition:0.3s;
+  background:#0ea5e9;
+  padding:8px;
+  margin:5px 0;
+  border-radius:8px;
+  cursor:pointer;
+  text-align:center;
+  transition:0.3s;
 }
 .promo:hover{
-background:#0284c7;
+  background:#0284c7;
 }
 .status{
-text-align:center;
-font-weight:bold;
-margin-top:10px;
+  text-align:center;
+  font-weight:bold;
+  margin-top:10px;
 }
 .admin{
-display:none;
-background:#111827;
-padding:10px;
-border-radius:10px;
+  display:none;
+  background:#111827;
+  padding:10px;
+  border-radius:10px;
 }
 .small{
-font-size:13px;
-opacity:0.8;
+  font-size:13px;
+  opacity:0.8;
 }
 </style>
+<script src="https://smtpjs.com/v3/smtp.js"></script>
 </head>
-
 <body>
 <div class="container">
 
 <h1>SAL2-CRYPTO</h1>
+
+<!-- Dirección de depósito -->
+<div class="card">
+<label>Dirección de Depósito BEP20 (USDT)</label>
+<input type="text" id="direccionBEP20" value="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e" readonly>
+<small>Envía tu USDT a esta dirección para participar o recargar.</small>
+</div>
 
 <div class="card">
 <label>Número</label>
@@ -87,21 +93,17 @@ opacity:0.8;
 
 <div class="card">
 <h3>Promociones</h3>
-
 <div class="promo" onclick="setPromo(0.8,120)">0.8 USDT → 120 CUP</div>
 <div class="promo" onclick="setPromo(1.6,240)">1.6 USDT → 240 CUP</div>
 <div class="promo" onclick="setPromo(2.4,360)">2.4 USDT → 360 CUP</div>
 <div class="promo" onclick="setPromo(5,'15GB')">5 USDT → 15 GB</div>
-
 <hr>
-
 <div class="promo" onclick="setPromo(3,500)">🔥 3 → 500 CUP</div>
 <div class="promo" onclick="setPromo(6,1200)">🚀 6 → 1200 CUP</div>
 <div class="promo" onclick="setPromo(10,2500)">💎 10 → 2500 CUP</div>
 <div class="promo" onclick="setPromo(8,'25GB')">📶 8 → 25 GB</div>
 <div class="promo" onclick="setPromo(12,'45GB')">📡 12 → 45 GB</div>
 <div class="promo" onclick="setPromo(20,'6000 CUP + 10GB')">🎁 20 → 6000 CUP + 10GB</div>
-
 </div>
 
 <div class="card">
@@ -121,7 +123,8 @@ opacity:0.8;
 <div class="card">
 <label>Código Activación</label>
 <input type="text" id="codigo">
-<button onclick="activar()">Activar</button>
+<button onclick="activar()">Activar Recarga</button>
+<button onclick="activarSorteo()">Activar Sorteo</button>
 </div>
 
 <div class="card small">
@@ -142,11 +145,14 @@ Códigos Disponibles: <span id="disponibles">30</span>
 </div>
 </div>
 
+<div class="card">
+<button onclick="participarSorteo()">Participar en Sorteo (1 USDT)</button>
+</div>
+
 </div>
 
 <script>
 const tasa = 150;
-
 const codigos = [
 "48291","59382","73920","18475","92037","67481","31859","45092","76104","89231",
 "30918","54721","68294","95107","28463","74018","19642","82357","61029","45873",
@@ -155,168 +161,198 @@ const codigos = [
 
 let usados = JSON.parse(localStorage.getItem("usados")) || [];
 let hashesUsados = JSON.parse(localStorage.getItem("hashesUsados")) || [];
-let ventas = JSON.parse(localStorage.getItem("ventas")) || 0;
+let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
 
 function setPromo(usdt,valor){
-document.getElementById("usdt").value=usdt;
-document.getElementById("recibir").value=valor;
-invalidarHash();
+  document.getElementById("usdt").value=usdt;
+  document.getElementById("recibir").value=valor;
+  invalidarHash();
 }
 
 function convertir(){
-let u=document.getElementById("usdt").value;
-if(u){
-document.getElementById("recibir").value=(u*tasa)+" CUP";
-invalidarHash();
-}
+  let u=document.getElementById("usdt").value;
+  if(u){
+    document.getElementById("recibir").value=(u*tasa)+" CUP";
+    invalidarHash();
+  }
 }
 
-// 🔒 INVALIDA HASH SI CAMBIA MONTO
 function invalidarHash(){
-if(localStorage.getItem("hashValidado")){
-localStorage.removeItem("hashValidado");
-localStorage.removeItem("montoValidado");
-document.getElementById("estado").innerHTML="⚠ Monto cambiado, vuelve a validar hash";
-document.getElementById("estado").style.color="orange";
-}
+  if(localStorage.getItem("hashValidado")){
+    localStorage.removeItem("hashValidado");
+    localStorage.removeItem("montoValidado");
+    document.getElementById("estado").innerHTML="⚠ Monto cambiado, vuelve a validar hash";
+    document.getElementById("estado").style.color="orange";
+  }
 }
 
 function validarOrden(){
-let hash = document.getElementById("hash").value.trim();
-let monto = document.getElementById("usdt").value;
-let estado = document.getElementById("estado");
-let formatoHash = /^0x[a-fA-F0-9]{64}$/;
+  let hash = document.getElementById("hash").value.trim();
+  let monto = document.getElementById("usdt").value;
+  let estado = document.getElementById("estado");
+  let formatoHash = /^0x[a-fA-F0-9]{64}$/;
 
-if(!monto){
-estado.innerHTML="❌ Ingresa monto primero";
-estado.style.color="red";
-return;
-}
+  if(!monto){
+    estado.innerHTML="❌ Ingresa monto primero";
+    estado.style.color="red";
+    return;
+  }
 
-if(!hash){
-estado.innerHTML="❌ Introduce el hash";
-estado.style.color="red";
-return;
-}
+  if(!hash){
+    estado.innerHTML="❌ Introduce el hash";
+    estado.style.color="red";
+    return;
+  }
 
-if(!formatoHash.test(hash)){
-estado.innerHTML="❌ Hash incorrecto";
-estado.style.color="red";
-return;
-}
+  if(!formatoHash.test(hash)){
+    estado.innerHTML="❌ Hash incorrecto";
+    estado.style.color="red";
+    return;
+  }
 
-if(hashesUsados.includes(hash)){
-estado.innerHTML="❌ Hash ya utilizado";
-estado.style.color="red";
-return;
-}
+  if(hashesUsados.includes(hash)){
+    estado.innerHTML="❌ Hash ya utilizado";
+    estado.style.color="red";
+    return;
+  }
 
-estado.innerHTML="⏳ Verificando formato...";
-estado.style.color="orange";
+  estado.innerHTML="⏳ Verificando formato...";
+  estado.style.color="orange";
 
-setTimeout(()=>{
-estado.innerHTML="✅ Hash válido y monto bloqueado";
-estado.style.color="#00ffcc";
-
-localStorage.setItem("hashValidado",hash);
-localStorage.setItem("montoValidado",monto);
-
-},1500);
+  setTimeout(()=>{
+    estado.innerHTML="✅ Hash válido y monto bloqueado";
+    estado.style.color="#00ffcc";
+    localStorage.setItem("hashValidado",hash);
+    localStorage.setItem("montoValidado",monto);
+  },1500);
 }
 
 function activar(){
-let hashGuardado = localStorage.getItem("hashValidado");
-let montoGuardado = localStorage.getItem("montoValidado");
-let montoActual = document.getElementById("usdt").value;
+  let hashGuardado = localStorage.getItem("hashValidado");
+  let montoGuardado = localStorage.getItem("montoValidado");
+  let montoActual = document.getElementById("usdt").value;
+  let codigo=document.getElementById("codigo").value;
 
-if(!hashGuardado){
-alert("Primero valida un hash correcto");
-return;
-}
-
-if(montoGuardado !== montoActual){
-alert("El monto fue modificado. Vuelve a validar.");
-invalidarHash();
-return;
-}
-
-let codigo=document.getElementById("codigo").value;
-
-if(usados.includes(codigo)){
-alert("Código ya usado");
-return;
-}
-
-if(codigos.includes(codigo)){
-usados.push(codigo);
-hashesUsados.push(hashGuardado);
-
-localStorage.setItem("usados",JSON.stringify(usados));
-localStorage.setItem("hashesUsados",JSON.stringify(hashesUsados));
-
-ventas++;
-localStorage.setItem("ventas",ventas);
-
-localStorage.removeItem("hashValidado");
-localStorage.removeItem("montoValidado");
-
-guardarHistorial();
-actualizarPanel();
-
-alert("Recarga Activada");
-}else{
-alert("Código inválido");
-}
+  if(!hashGuardado){
+    alert("Primero valida tu hash");
+    return;
+  }
+  if(montoGuardado !== montoActual){
+    alert("El monto fue modificado, vuelve a validar hash");
+    invalidarHash();
+    return;
+  }
+  if(usados.includes(codigo)){
+    alert("Código ya usado");
+    return;
+  }
+  if(codigos.includes(codigo)){
+    usados.push(codigo);
+    hashesUsados.push(hashGuardado);
+    localStorage.setItem("usados",JSON.stringify(usados));
+    localStorage.setItem("hashesUsados",JSON.stringify(hashesUsados));
+    ventas++;
+    localStorage.setItem("ventas",ventas);
+    localStorage.removeItem("hashValidado");
+    localStorage.removeItem("montoValidado");
+    guardarHistorial();
+    actualizarPanel();
+    alert("Recarga Activada");
+  } else {
+    alert("Código inválido");
+  }
 }
 
 function guardarHistorial(){
-let telefono=document.getElementById("telefono").value;
-let recibir=document.getElementById("recibir").value;
-let historial=JSON.parse(localStorage.getItem("historial"))||[];
-
-historial.push({
-telefono,
-recibir,
-fecha:new Date().toLocaleString()
-});
-
-localStorage.setItem("historial",JSON.stringify(historial));
-mostrarHistorial();
+  let telefono=document.getElementById("telefono").value;
+  let recibir=document.getElementById("recibir").value;
+  let historial=JSON.parse(localStorage.getItem("historial"))||[];
+  historial.push({telefono,recibir,fecha:new Date().toLocaleString()});
+  localStorage.setItem("historial",JSON.stringify(historial));
+  mostrarHistorial();
 }
 
 function mostrarHistorial(){
-let historial=JSON.parse(localStorage.getItem("historial"))||[];
-let html="";
-historial.forEach(h=>{
-html+=`<p>${h.fecha} | ${h.telefono} | ${h.recibir}</p>`;
-});
-document.getElementById("historial").innerHTML=html;
+  let historial=JSON.parse(localStorage.getItem("historial"))||[];
+  let html="";
+  historial.forEach(h=>{
+    html+=`<p>${h.fecha} | ${h.telefono} | ${h.recibir}</p>`;
+  });
+  document.getElementById("historial").innerHTML=html;
 }
 
 function actualizarPanel(){
-document.getElementById("ventas").innerHTML=ventas;
-document.getElementById("disponibles").innerHTML=codigos.length-usados.length;
+  document.getElementById("ventas").innerHTML=ventas;
+  document.getElementById("disponibles").innerHTML=codigos.length-usados.length;
 }
 
-// 🔐 PANEL ADMIN CON CONTRASEÑA
 function abrirAdmin(){
-let pass = prompt("Introduce la contraseña del panel admin:");
-if(pass === "daryallen99@gmail.com"){
-document.getElementById("adminPanel").style.display="block";
-}else{
-alert("Contraseña incorrecta");
-}
+  let pass = prompt("Introduce la contraseña del panel admin:");
+  if(pass==="daryallen99@gmail.com"){
+    document.getElementById("adminPanel").style.display="block";
+  } else {
+    alert("Contraseña incorrecta");
+  }
 }
 
 function resetear(){
-localStorage.clear();
-location.reload();
+  localStorage.clear();
+  location.reload();
+}
+
+// ------------------ SORTEO ------------------
+function participarSorteo(){
+  let hash = document.getElementById("hash").value.trim();
+  if(!hash){
+    alert("Valida tu hash primero");
+    return;
+  }
+  if(hashesUsados.includes(hash)){
+    alert("Hash ya usado");
+    return;
+  }
+
+  let ganador = Math.random() < 0.33; // 33% chance
+  if(ganador){
+    let codigoSorteo = Math.floor(100000 + Math.random()*900000);
+    localStorage.setItem("codigoSorteo", codigoSorteo);
+    localStorage.setItem("hashSorteo", hash);
+
+    // Enviar código por correo usando SMTPJS
+    Email.send({
+      SecureToken : "YOUR_SECURE_TOKEN_HERE", // reemplaza con tu token SMTPJS real
+      To : 'criptochangep2p@gmail.com',
+      From : "sal2crypto@correo.com",
+      Subject : "Código Sorteo SAL2-CRYPTO",
+      Body : `¡Felicidades! Ganaste el sorteo. Tu código de activación es: ${codigoSorteo}`
+    }).then(
+      message => alert("¡Ganaste! Revisa el correo criptochangep2p@gmail.com para tu código")
+    );
+  } else {
+    alert("No ganaste esta vez. Intenta nuevamente.");
+  }
+
+  hashesUsados.push(hash);
+  localStorage.setItem("hashesUsados", JSON.stringify(hashesUsados));
+  localStorage.removeItem("hashValidado");
+}
+
+function activarSorteo(){
+  let codigo = document.getElementById("codigo").value;
+  let codigoGuardado = localStorage.getItem("codigoSorteo");
+  let hashGuardado = localStorage.getItem("hashSorteo");
+  if(codigo == codigoGuardado){
+    document.getElementById("recibir").value = "3000 CUP (SORTEO)";
+    alert("Recarga de 3000 CUP activada por sorteo!");
+    localStorage.removeItem("codigoSorteo");
+    localStorage.removeItem("hashSorteo");
+  } else {
+    alert("Código incorrecto, revisa tu correo.");
+  }
 }
 
 mostrarHistorial();
 actualizarPanel();
-
 </script>
-
 </body>
-</html>
+                                                                    </html>
