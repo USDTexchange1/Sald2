@@ -1,26 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
 <title>QVA-CREDIT</title>
 
 <style>
 
-*{
-box-sizing:border-box;
-}
-
 body{
 margin:0;
-font-family:Arial, Helvetica, sans-serif;
+font-family:Arial;
 background:#0f172a;
 color:white;
 }
-
-/* HEADER */
 
 header{
 background:#020617;
@@ -28,19 +20,14 @@ padding:15px;
 display:flex;
 justify-content:space-between;
 align-items:center;
-position:sticky;
-top:0;
-z-index:10;
 }
-
-/* SIDEBAR */
 
 .sidebar{
 background:#020617;
 padding:10px;
 display:flex;
 flex-wrap:wrap;
-gap:8px;
+gap:10px;
 }
 
 .sidebar button{
@@ -48,24 +35,16 @@ flex:1 1 45%;
 padding:10px;
 background:#1e293b;
 border:none;
-border-radius:6px;
 color:white;
+border-radius:6px;
 cursor:pointer;
 }
 
-.sidebar button:hover{
-background:#334155;
-}
-
-/* MAIN */
-
 .main{
-padding:15px;
+padding:20px;
 max-width:900px;
 margin:auto;
 }
-
-/* CARDS */
 
 .card{
 background:#1e293b;
@@ -73,8 +52,6 @@ padding:15px;
 border-radius:10px;
 margin-bottom:15px;
 }
-
-/* BUTTONS */
 
 .btn{
 background:#22c55e;
@@ -85,12 +62,6 @@ color:white;
 cursor:pointer;
 }
 
-.btn-danger{
-background:#ef4444;
-}
-
-/* INPUT */
-
 input{
 width:100%;
 padding:10px;
@@ -99,30 +70,8 @@ border-radius:6px;
 border:none;
 }
 
-/* TABLE */
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-th,td{
-padding:10px;
-border-bottom:1px solid #334155;
-font-size:14px;
-}
-
-/* PAGES */
-
-.page{
-display:none;
-}
-
-.active{
-display:block;
-}
-
-/* VIRTUAL CARD */
+.page{display:none;}
+.active{display:block;}
 
 .virtual-card{
 background:linear-gradient(135deg,#2563eb,#0ea5e9);
@@ -130,16 +79,21 @@ padding:20px;
 border-radius:12px;
 max-width:320px;
 margin:auto;
-box-shadow:0 10px 20px rgba(0,0,0,0.4);
 }
 
-.virtual-card h3{
-margin-top:0;
+.notification{
+background:#2563eb;
+padding:10px;
+border-radius:6px;
+margin-bottom:10px;
 }
 
-.small{
+.address{
+background:#020617;
+padding:10px;
+border-radius:6px;
 font-size:12px;
-opacity:0.8;
+word-break:break-all;
 }
 
 </style>
@@ -152,25 +106,23 @@ opacity:0.8;
 <button class="btn" onclick="logout()">Salir</button>
 </header>
 
-<div class="sidebar" id="sidebar">
+<div class="sidebar" id="sidebar" style="display:none">
 
 <button onclick="showPage('dashboard')">Dashboard</button>
 <button onclick="showPage('wallet')">Wallet</button>
-<button onclick="showPage('buyCard')">Comprar tarjeta</button>
 <button onclick="showPage('card')">Mi tarjeta</button>
-<button onclick="showPage('bonuses')">Bonos</button>
+<button onclick="showPage('buyCard')">Comprar tarjeta</button>
 <button onclick="showPage('transactions')">Transacciones</button>
 <button onclick="showPage('notifications')">Notificaciones</button>
+<button onclick="showPage('profile')">Perfil</button>
 
 </div>
 
 <div class="main">
 
-<!-- LOGIN -->
-
 <div id="login" class="page active">
 
-<h2>Acceso</h2>
+<h2>Login</h2>
 
 <input id="loginUser" placeholder="Usuario">
 <input id="loginPass" type="password" placeholder="Contraseña">
@@ -182,8 +134,6 @@ opacity:0.8;
 <button onclick="showPage('register')">Crear cuenta</button>
 
 </div>
-
-<!-- REGISTER -->
 
 <div id="register" class="page">
 
@@ -199,51 +149,53 @@ opacity:0.8;
 
 </div>
 
-<!-- DASHBOARD -->
-
 <div id="dashboard" class="page">
 
-<h2>Panel principal</h2>
+<h2>Panel</h2>
 
 <div class="card">
-
-Saldo de wallet
-
+Saldo wallet
 <h3 id="walletBalance"></h3>
-
 </div>
 
 </div>
-
-<!-- WALLET -->
 
 <div id="wallet" class="page">
 
-<h2>Wallet</h2>
+<h2>Depositar USDT</h2>
 
 <div class="card">
 
-Saldo actual
+<h3>Red: TRC20</h3>
 
-<h3 id="walletBalance2"></h3>
+<p>Dirección de depósito:</p>
+
+<div class="address">
+TRX9QVA9EexampleWalletAddressUsdtTRC20
+</div>
 
 </div>
 
 <div class="card">
 
-<h3>Depositar</h3>
+<input id="depositAmount" placeholder="Monto enviado en USDT">
+<input id="depositHash" placeholder="Hash de transacción (TXID)">
 
-<input id="depositAmount" placeholder="Monto">
+<button class="btn" onclick="startDeposit()">Enviar solicitud</button>
 
-<input id="codeInput" placeholder="Código de confirmación">
+</div>
 
-<button class="btn" onclick="confirmDeposit()">Confirmar depósito</button>
+<div class="card">
+
+<h3>Confirmar código</h3>
+
+<input id="codeInput" placeholder="Código recibido">
+
+<button class="btn" onclick="confirmCode()">Confirmar</button>
 
 </div>
 
 </div>
-
-<!-- CARD -->
 
 <div id="card" class="page">
 
@@ -254,27 +206,21 @@ Saldo actual
 <h3>QVA-CREDIT</h3>
 
 <p id="cardHolder"></p>
-
-<p>ID tarjeta</p>
 <p id="cardId"></p>
-
-<p>Saldo tarjeta</p>
 <p id="cardBalance"></p>
 
 </div>
 
 </div>
 
-<!-- BUY CARD -->
-
 <div id="buyCard" class="page">
-
-<h2>Comprar tarjeta</h2>
 
 <div class="card">
 
-<p>Costo: 3 créditos</p>
-<p>Bono inicial: 25 créditos</p>
+Costo tarjeta: 3 USDT  
+Saldo inicial: 25 USDT
+
+<br><br>
 
 <button class="btn" onclick="buyCard()">Comprar</button>
 
@@ -282,37 +228,11 @@ Saldo actual
 
 </div>
 
-<!-- BONUSES -->
-
-<div id="bonuses" class="page">
-
-<h2>Bonos</h2>
-
-<div class="card">
-
-<h3>Bono de registro</h3>
-
-<p id="bonusRegisterStatus"></p>
-
-</div>
-
-<div class="card">
-
-<h3>Bono tarjeta</h3>
-
-<p id="bonusCardStatus"></p>
-
-</div>
-
-</div>
-
-<!-- TRANSACTIONS -->
-
 <div id="transactions" class="page">
 
-<h2>Transacciones</h2>
+<h2>Historial</h2>
 
-<table>
+<table width="100%">
 
 <tr>
 <th>Tipo</th>
@@ -326,8 +246,6 @@ Saldo actual
 
 </div>
 
-<!-- NOTIFICATIONS -->
-
 <div id="notifications" class="page">
 
 <h2>Notificaciones</h2>
@@ -336,71 +254,48 @@ Saldo actual
 
 </div>
 
+<div id="profile" class="page">
+
+<h2>Perfil</h2>
+
+<input id="profileEmail" placeholder="Correo">
+
+<button class="btn" onclick="saveProfile()">Guardar</button>
+
+</div>
+
 </div>
 
 <script>
 
-/* CÓDIGOS DE DEPÓSITO */
-
-const FIXED_CODES=[
-4821,7394,1560,9043,2678,
-5112,8304,6497,2915,7730,
-4086,1259,6621,3184,9472
-]
-
 if(!localStorage.users)
 localStorage.users=JSON.stringify({})
 
-function showPage(page){
+function showPage(p){
 
-document.querySelectorAll(".page")
-.forEach(p=>p.classList.remove("active"))
+document.querySelectorAll(".page").forEach(x=>x.classList.remove("active"))
 
-document.getElementById(page)
-.classList.add("active")
-
-if(localStorage.session)
-sidebar.style.display="flex"
+document.getElementById(p).classList.add("active")
 
 updateUI()
 
 }
 
-/* REGISTRO */
-
 function register(){
 
 let users=JSON.parse(localStorage.users)
 
-let name=regName.value
-let last=regLast.value
-let age=Number(regAge.value)
 let user=regUser.value
-let pass=regPass.value
-
-if(age<18){
-alert("Debes ser mayor de edad")
-return
-}
-
-if(users[user]){
-alert("Usuario existente")
-return
-}
 
 users[user]={
-
-name,
-last,
-age,
-pass,
-
-wallet:0,
-bonusUsed:false,
+name:regName.value,
+last:regLast.value,
+age:Number(regAge.value),
+pass:regPass.value,
+walletBalance:0,
 card:null,
 transactions:[],
 notifications:[]
-
 }
 
 localStorage.users=JSON.stringify(users)
@@ -411,8 +306,6 @@ showPage("login")
 
 }
 
-/* LOGIN */
-
 function login(){
 
 let users=JSON.parse(localStorage.users)
@@ -420,18 +313,20 @@ let users=JSON.parse(localStorage.users)
 let u=loginUser.value
 let p=loginPass.value
 
-if(!users[u] || users[u].pass!==p){
+if(!users[u]||users[u].pass!=p){
+
 alert("Datos incorrectos")
 return
+
 }
 
 localStorage.session=u
 
+sidebar.style.display="flex"
+
 showPage("dashboard")
 
 }
-
-/* LOGOUT */
 
 function logout(){
 
@@ -442,8 +337,6 @@ sidebar.style.display="none"
 showPage("login")
 
 }
-
-/* USER */
 
 function getUser(){
 
@@ -463,33 +356,76 @@ localStorage.users=JSON.stringify(users)
 
 }
 
-/* DEPOSIT */
+let pendingDeposit=null
+let depositCode=null
 
-function confirmDeposit(){
+function validHash(hash){
 
-let code=Number(codeInput.value)
+return /^0x([A-Fa-f0-9]{64})$/.test(hash) || /^[A-Fa-f0-9]{64}$/.test(hash)
+
+}
+
+function startDeposit(){
 
 let amount=Number(depositAmount.value)
+let hash=depositHash.value.trim()
 
-if(!FIXED_CODES.includes(code)){
-alert("Código inválido")
+if(!amount || !hash){
+
+alert("Completa los datos")
 return
+
 }
+
+if(!validHash(hash)){
+
+alert("Formato de HASH inválido")
+return
+
+}
+
+pendingDeposit=amount
+
+let wait=(120000+Math.random()*60000)
+
+addNotification("Solicitud recibida. Espera confirmación.")
+
+setTimeout(()=>{
+
+depositCode=Math.floor(1000+Math.random()*9000)
+
+showCodeNotification(depositCode)
+
+},wait)
+
+}
+
+function showCodeNotification(code){
 
 let user=getUser()
 
-user.wallet+=amount
+user.notifications.push({
+msg:"Código de confirmación: "+code,
+date:new Date().toLocaleString()
+})
 
-if(amount>=5 && !user.bonusUsed){
+saveUser(user)
 
-user.wallet+=15
-user.bonusUsed=true
+updateUI()
 
-addNotification("Bono de registro activado")
+setTimeout(()=>{
+
+removeCodeNotification()
+
+},15000)
 
 }
 
-addTransaction("Deposito",amount)
+function removeCodeNotification(){
+
+let user=getUser()
+
+user.notifications=user.notifications.filter(n=>!n.msg.includes("Código"))
 
 saveUser(user)
 
@@ -497,29 +433,54 @@ updateUI()
 
 }
 
-/* CARD */
+function confirmCode(){
+
+let code=Number(codeInput.value)
+
+if(code!==depositCode){
+
+alert("Código incorrecto")
+return
+
+}
+
+let user=getUser()
+
+user.walletBalance+=pendingDeposit
+
+user.transactions.push({
+type:"Deposito",
+amount:pendingDeposit+" USDT",
+date:new Date().toLocaleString()
+})
+
+pendingDeposit=null
+depositCode=null
+
+addNotification("Depósito aprobado")
+
+saveUser(user)
+
+updateUI()
+
+}
 
 function buyCard(){
 
 let user=getUser()
 
-if(user.card){
-alert("Ya tienes tarjeta")
-return
-}
+if(user.walletBalance<3){
 
-if(user.wallet<3){
 alert("Saldo insuficiente")
 return
+
 }
 
-user.wallet-=3
-
-let id="QVA-"+Math.floor(Math.random()*100000000)
+user.walletBalance-=3
 
 user.card={
 holder:user.name+" "+user.last,
-id:id,
+id:"QVA-"+Math.floor(Math.random()*100000000),
 balance:25
 }
 
@@ -531,23 +492,17 @@ updateUI()
 
 }
 
-/* TRANSACTION */
-
-function addTransaction(type,amount){
+function saveProfile(){
 
 let user=getUser()
 
-user.transactions.push({
-type,
-amount,
-date:new Date().toLocaleString()
-})
+user.email=profileEmail.value
 
 saveUser(user)
 
-}
+alert("Guardado")
 
-/* NOTIFICATION */
+}
 
 function addNotification(msg){
 
@@ -562,33 +517,19 @@ saveUser(user)
 
 }
 
-/* LOAD DATA */
-
 function updateUI(){
 
 if(!localStorage.session) return
 
 let user=getUser()
 
-walletBalance.innerText=user.wallet+" créditos"
-walletBalance2.innerText=user.wallet+" créditos"
+walletBalance.innerText=user.walletBalance+" USDT"
 
-updateCard()
+profileEmail.value=user.email||""
+
 updateTransactions()
 updateNotifications()
-updateBonuses()
-
-}
-
-function updateCard(){
-
-let user=getUser()
-
-if(!user.card) return
-
-cardHolder.innerText=user.card.holder
-cardId.innerText=user.card.id
-cardBalance.innerText=user.card.balance+" créditos"
+updateCard()
 
 }
 
@@ -598,11 +539,13 @@ let user=getUser()
 
 txTable.innerHTML=""
 
-user.transactions.slice().reverse()
-.forEach(t=>{
+user.transactions.slice().reverse().forEach(t=>{
 
-txTable.innerHTML+=
-`<tr><td>${t.type}</td><td>${t.amount}</td><td>${t.date}</td></tr>`
+txTable.innerHTML+=`<tr>
+<td>${t.type}</td>
+<td>${t.amount}</td>
+<td>${t.date}</td>
+</tr>`
 
 })
 
@@ -614,33 +557,29 @@ let user=getUser()
 
 notificationList.innerHTML=""
 
-user.notifications.slice().reverse()
-.forEach(n=>{
+user.notifications.slice().reverse().forEach(n=>{
 
-notificationList.innerHTML+=
-`<div class="card">${n.msg}<br><span class="small">${n.date}</span></div>`
+notificationList.innerHTML+=`
+<div class="notification">
+${n.msg}<br>
+<small>${n.date}</small>
+</div>`
 
 })
 
 }
 
-function updateBonuses(){
+function updateCard(){
 
 let user=getUser()
 
-bonusRegisterStatus.innerText=
-user.bonusUsed?
-"Activado":
-"Deposita mínimo 5"
+if(!user.card) return
 
-bonusCardStatus.innerText=
-user.card?
-"Activado":
-"Compra una tarjeta"
+cardHolder.innerText=user.card.holder
+cardId.innerText=user.card.id
+cardBalance.innerText="Saldo "+user.card.balance+" USDT"
 
 }
-
-/* SESSION */
 
 if(localStorage.session){
 
