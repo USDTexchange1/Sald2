@@ -1,358 +1,797 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SAL2-CRYPTO</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>QVA-CREDIT</title>
+
 <style>
+
 body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:linear-gradient(135deg,#0f172a,#020617);
-  color:white;
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
 }
-.container{
-  max-width:500px;
-  margin:auto;
-  padding:20px;
+
+header{
+background:#020617;
+padding:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
-h1{
-  text-align:center;
-  color:#00ffcc;
+
+.sidebar{
+position:fixed;
+left:0;
+top:0;
+width:220px;
+height:100%;
+background:#020617;
+padding-top:70px;
 }
+
+.sidebar button{
+width:100%;
+padding:12px;
+border:none;
+background:none;
+color:white;
+cursor:pointer;
+text-align:left;
+}
+
+.sidebar button:hover{
+background:#1e293b;
+}
+
+.main{
+margin-left:220px;
+padding:30px;
+}
+
 .card{
-  background:#1e293b;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:15px;
-  box-shadow:0 0 10px rgba(0,255,204,0.2);
+background:#1e293b;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
 }
-input,button{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border-radius:8px;
-  border:none;
-  font-size:15px;
+
+.btn{
+background:#22c55e;
+border:none;
+padding:10px 18px;
+border-radius:6px;
+cursor:pointer;
+color:white;
 }
-button{
-  background:#00ffcc;
-  font-weight:bold;
-  cursor:pointer;
-  transition:0.3s;
+
+.btn-danger{
+background:#ef4444;
+border:none;
+padding:10px 18px;
+border-radius:6px;
+cursor:pointer;
+color:white;
 }
-button:hover{
-  background:#00ccaa;
+
+input{
+padding:10px;
+width:260px;
+border-radius:6px;
+border:none;
+margin-bottom:10px;
 }
-.promo{
-  background:#0ea5e9;
-  padding:8px;
-  margin:5px 0;
-  border-radius:8px;
-  cursor:pointer;
-  text-align:center;
-  transition:0.3s;
+
+.page{
+display:none;
 }
-.promo:hover{
-  background:#0284c7;
+
+.active{
+display:block;
 }
-.status{
-  text-align:center;
-  font-weight:bold;
-  margin-top:10px;
+
+.virtual-card{
+width:350px;
+padding:25px;
+border-radius:14px;
+background:linear-gradient(135deg,#2563eb,#0ea5e9);
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
 }
-.admin{
-  display:none;
-  background:#111827;
-  padding:10px;
-  border-radius:10px;
+
+table{
+width:100%;
+border-collapse:collapse;
 }
-.small{
-  font-size:13px;
-  opacity:0.8;
+
+th,td{
+padding:10px;
+border-bottom:1px solid #334155;
 }
+
 </style>
-<script src="https://smtpjs.com/v3/smtp.js"></script>
+
 </head>
+
 <body>
-<div class="container">
 
-<h1>SAL2-CRYPTO</h1>
+<header>
 
-<!-- Dirección de depósito -->
-<div class="card">
-<label>Dirección de Depósito BEP20 (USDT)</label>
-<input type="text" id="direccionBEP20" value="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e" readonly>
-<small>Envía tu USDT a esta dirección para participar o recargar.</small>
+<h2>QVA-CREDIT</h2>
+
+<button class="btn" onclick="logout()">Logout</button>
+
+</header>
+
+
+<div class="sidebar">
+
+<button onclick="showPage('dashboard')">Dashboard</button>
+<button onclick="showPage('wallet')">Wallet</button>
+<button onclick="showPage('buyCard')">Comprar tarjeta</button>
+<button onclick="showPage('card')">Mi tarjeta</button>
+<button onclick="showPage('transactions')">Transacciones</button>
+<button onclick="showPage('bonuses')">Bonos</button>
+<button onclick="showPage('notifications')">Notificaciones</button>
+
 </div>
 
-<div class="card">
-<label>Número</label>
-<input type="text" id="telefono" placeholder="535xxxxxxx">
+
+<div class="main">
+
+
+<!-- LOGIN -->
+
+<div id="login" class="page active">
+
+<h2>Login</h2>
+
+<input id="loginUser" placeholder="Usuario"><br>
+<input id="loginPass" type="password" placeholder="Contraseña"><br>
+
+<button class="btn" onclick="login()">Entrar</button>
+
+<br><br>
+
+<button onclick="showPage('register')">Crear cuenta</button>
+
 </div>
 
-<div class="card">
-<h3>Promociones</h3>
-<div class="promo" onclick="setPromo(0.8,120)">0.8 USDT → 120 CUP</div>
-<div class="promo" onclick="setPromo(1.6,240)">1.6 USDT → 240 CUP</div>
-<div class="promo" onclick="setPromo(2.4,360)">2.4 USDT → 360 CUP</div>
-<div class="promo" onclick="setPromo(5,'15GB')">5 USDT → 15 GB</div>
-<hr>
-<div class="promo" onclick="setPromo(3,500)">🔥 3 → 500 CUP</div>
-<div class="promo" onclick="setPromo(6,1200)">🚀 6 → 1200 CUP</div>
-<div class="promo" onclick="setPromo(10,2500)">💎 10 → 2500 CUP</div>
-<div class="promo" onclick="setPromo(8,'25GB')">📶 8 → 25 GB</div>
-<div class="promo" onclick="setPromo(12,'45GB')">📡 12 → 45 GB</div>
-<div class="promo" onclick="setPromo(20,'6000 CUP + 10GB')">🎁 20 → 6000 CUP + 10GB</div>
+
+<!-- REGISTRO -->
+
+<div id="register" class="page">
+
+<h2>Registro</h2>
+
+<input id="regUser" placeholder="Usuario"><br>
+<input id="regPass" type="password" placeholder="Contraseña"><br>
+
+<button class="btn" onclick="register()">Registrar</button>
+
 </div>
 
-<div class="card">
-<label>USDT</label>
-<input type="number" id="usdt" oninput="convertir()" placeholder="Cantidad">
-<label>Recibirás</label>
-<input type="text" id="recibir" readonly>
-</div>
 
-<div class="card">
-<label>Hash BEP20</label>
-<input type="text" id="hash" placeholder="0x...">
-<button onclick="validarOrden()">Validar Hash</button>
-<div class="status" id="estado"></div>
-</div>
 
-<div class="card">
-<label>Código Activación</label>
-<input type="text" id="codigo">
-<button onclick="activar()">Activar Recarga</button>
-<button onclick="activarSorteo()">Activar Sorteo</button>
-</div>
+<!-- DASHBOARD -->
 
-<div class="card small">
-Ventas Totales: <span id="ventas">0</span><br>
-Códigos Disponibles: <span id="disponibles">30</span>
-</div>
+<div id="dashboard" class="page">
 
-<div class="card">
-<h3>Historial</h3>
-<div id="historial"></div>
-</div>
-
-<div class="card">
-<button onclick="abrirAdmin()">Panel Admin</button>
-<div class="admin" id="adminPanel">
-<h4>Administrador</h4>
-<button onclick="resetear()">Resetear Sistema</button>
-</div>
-</div>
+<h2>Dashboard</h2>
 
 <div class="card">
-<button onclick="participarSorteo()">Participar en Sorteo (1 USDT)</button>
+
+Saldo Wallet
+
+<p id="walletBalance"></p>
+
+</div>
+
+<div class="card">
+
+Bono de registro
+
+<p id="bonusStatus"></p>
+
 </div>
 
 </div>
+
+
+
+<!-- WALLET -->
+
+<div id="wallet" class="page">
+
+<h2>Wallet</h2>
+
+<div class="card">
+
+Saldo actual
+
+<p id="walletBalance2"></p>
+
+</div>
+
+
+<div class="card">
+
+<h3>Depositar USDT</h3>
+
+<p>Dirección BEP20</p>
+
+<input id="depositAddress" value="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e" readonly>
+
+<br><br>
+
+<button class="btn" onclick="copyDeposit()">Copiar dirección</button>
+
+<br><br>
+
+<input id="depositAmount" placeholder="Monto USDT">
+
+<input id="depositHash" placeholder="Hash de transacción">
+
+<br>
+
+<a id="mailButton"
+href="mailto:criptochangep2p@gmail.com?subject=Confirmar%20Deposito&body=Usuario:%20%0AMonto:%20%0AHash:%20"
+class="btn">
+
+Enviar correo de confirmación
+
+</a>
+
+<br><br>
+
+<input id="codeInput" placeholder="Código de confirmación">
+
+<button class="btn" onclick="confirmDeposit()">Confirmar depósito</button>
+
+</div>
+
+
+<div class="card">
+
+<h3>Retirar interno</h3>
+
+<input id="withdrawAmount" placeholder="Monto">
+
+<button class="btn-danger" onclick="withdraw()">Retirar</button>
+
+</div>
+
+
+<div class="card">
+
+<h3>Retirar a otra wallet</h3>
+
+<input id="withdrawAddress" placeholder="Dirección destino">
+
+<input id="withdrawCryptoAmount" placeholder="Monto">
+
+<button class="btn-danger" onclick="withdrawCrypto()">Enviar</button>
+
+</div>
+
+</div>
+
+
+
+<!-- TARJETA -->
+
+<div id="card" class="page">
+
+<h2>Tarjeta QVA-CREDIT</h2>
+
+<div class="virtual-card">
+
+<h3>QVA-CREDIT</h3>
+
+<p id="cardNumber">----</p>
+
+<p>Exp <span id="cardExp"></span></p>
+
+<p>CVV <span id="cardCvv"></span></p>
+
+<p>Saldo tarjeta <span id="cardBalance"></span></p>
+
+<p>Estado <span id="cardStatus"></span></p>
+
+</div>
+
+<br>
+
+<button onclick="lockCard()">Bloquear</button>
+
+<button onclick="unlockCard()">Desbloquear</button>
+
+<button class="btn-danger" onclick="deleteCard()">Eliminar</button>
+
+</div>
+
+
+
+<!-- COMPRAR TARJETA -->
+
+<div id="buyCard" class="page">
+
+<h2>Comprar tarjeta</h2>
+
+<p>Costo 3 USDT</p>
+
+<p>Bono tarjeta 25 USDT</p>
+
+<button class="btn" onclick="buyCard()">Comprar tarjeta</button>
+
+</div>
+
+
+
+<!-- BONOS -->
+
+<div id="bonuses" class="page">
+
+<h2>Bonos</h2>
+
+<div class="card">
+
+Bono registro 15 USDT
+
+<p id="bonusState"></p>
+
+</div>
+
+</div>
+
+
+
+<!-- TRANSACCIONES -->
+
+<div id="transactions" class="page">
+
+<h2>Historial</h2>
+
+<table>
+
+<tr>
+<th>Tipo</th>
+<th>Monto</th>
+<th>Estado</th>
+<th>Fecha</th>
+</tr>
+
+<tbody id="txTable"></tbody>
+
+</table>
+
+</div>
+
+
+
+<!-- NOTIFICACIONES -->
+
+<div id="notifications" class="page">
+
+<h2>Notificaciones</h2>
+
+<div id="notificationList"></div>
+
+</div>
+
+</div>
+
+
 
 <script>
-const tasa = 150;
-const codigos = [
-"48291","59382","73920","18475","92037","67481","31859","45092","76104","89231",
-"30918","54721","68294","95107","28463","74018","19642","82357","61029","45873",
-"72916","30584","86420","94751","23190","67832","54017","81263","39485","15970"
-];
 
-let usados = JSON.parse(localStorage.getItem("usados")) || [];
-let hashesUsados = JSON.parse(localStorage.getItem("hashesUsados")) || [];
-let ventas = JSON.parse(localStorage.getItem("ventas")) || [];
+/* WALLET SISTEMA */
 
-function setPromo(usdt,valor){
-  document.getElementById("usdt").value=usdt;
-  document.getElementById("recibir").value=valor;
-  invalidarHash();
+const SYSTEM_WALLET="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e"
+
+
+
+/* CODIGOS FIJOS */
+
+const FIXED_CODES=[
+4821,7394,1560,9043,2678,
+5112,8304,6497,2915,7730,
+4086,1259,6621,3184,9472
+]
+
+
+
+if(!localStorage.codes){
+
+let codes=FIXED_CODES.map(c=>({code:c,used:false}))
+
+localStorage.codes=JSON.stringify(codes)
+
 }
 
-function convertir(){
-  let u=document.getElementById("usdt").value;
-  if(u){
-    document.getElementById("recibir").value=(u*tasa)+" CUP";
-    invalidarHash();
-  }
+
+
+if(!localStorage.lastCodeUse){
+
+localStorage.lastCodeUse=0
+
 }
 
-function invalidarHash(){
-  if(localStorage.getItem("hashValidado")){
-    localStorage.removeItem("hashValidado");
-    localStorage.removeItem("montoValidado");
-    document.getElementById("estado").innerHTML="⚠ Monto cambiado, vuelve a validar hash";
-    document.getElementById("estado").style.color="orange";
-  }
+
+
+/* STORAGE INICIAL */
+
+if(!localStorage.users)localStorage.users=JSON.stringify({})
+if(!localStorage.wallet)localStorage.wallet=20
+if(!localStorage.transactions)localStorage.transactions=JSON.stringify([])
+if(!localStorage.notifications)localStorage.notifications=JSON.stringify([])
+if(!localStorage.bonus)localStorage.bonus="Bloqueado"
+
+
+
+function showPage(page){
+
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"))
+
+document.getElementById(page).classList.add("active")
+
 }
 
-function validarOrden(){
-  let hash = document.getElementById("hash").value.trim();
-  let monto = document.getElementById("usdt").value;
-  let estado = document.getElementById("estado");
-  let formatoHash = /^0x[a-fA-F0-9]{64}$/;
 
-  if(!monto){
-    estado.innerHTML="❌ Ingresa monto primero";
-    estado.style.color="red";
-    return;
-  }
 
-  if(!hash){
-    estado.innerHTML="❌ Introduce el hash";
-    estado.style.color="red";
-    return;
-  }
+function updateBalance(){
 
-  if(!formatoHash.test(hash)){
-    estado.innerHTML="❌ Hash incorrecto";
-    estado.style.color="red";
-    return;
-  }
+walletBalance.innerText=localStorage.wallet+" USDT"
+walletBalance2.innerText=localStorage.wallet+" USDT"
+bonusStatus.innerText=localStorage.bonus
+bonusState.innerText=localStorage.bonus
 
-  if(hashesUsados.includes(hash)){
-    estado.innerHTML="❌ Hash ya utilizado";
-    estado.style.color="red";
-    return;
-  }
-
-  estado.innerHTML="⏳ Verificando formato...";
-  estado.style.color="orange";
-
-  setTimeout(()=>{
-    estado.innerHTML="✅ Hash válido y monto bloqueado";
-    estado.style.color="#00ffcc";
-    localStorage.setItem("hashValidado",hash);
-    localStorage.setItem("montoValidado",monto);
-  },1500);
 }
 
-function activar(){
-  let hashGuardado = localStorage.getItem("hashValidado");
-  let montoGuardado = localStorage.getItem("montoValidado");
-  let montoActual = document.getElementById("usdt").value;
-  let codigo=document.getElementById("codigo").value;
+updateBalance()
 
-  if(!hashGuardado){
-    alert("Primero valida tu hash");
-    return;
-  }
-  if(montoGuardado !== montoActual){
-    alert("El monto fue modificado, vuelve a validar hash");
-    invalidarHash();
-    return;
-  }
-  if(usados.includes(codigo)){
-    alert("Código ya usado");
-    return;
-  }
-  if(codigos.includes(codigo)){
-    usados.push(codigo);
-    hashesUsados.push(hashGuardado);
-    localStorage.setItem("usados",JSON.stringify(usados));
-    localStorage.setItem("hashesUsados",JSON.stringify(hashesUsados));
-    ventas++;
-    localStorage.setItem("ventas",ventas);
-    localStorage.removeItem("hashValidado");
-    localStorage.removeItem("montoValidado");
-    guardarHistorial();
-    actualizarPanel();
-    alert("Recarga Activada");
-  } else {
-    alert("Código inválido");
-  }
+
+
+function addNotification(msg){
+
+let list=JSON.parse(localStorage.notifications)
+
+list.push({message:msg,date:new Date().toLocaleString()})
+
+localStorage.notifications=JSON.stringify(list)
+
+loadNotifications()
+
 }
 
-function guardarHistorial(){
-  let telefono=document.getElementById("telefono").value;
-  let recibir=document.getElementById("recibir").value;
-  let historial=JSON.parse(localStorage.getItem("historial"))||[];
-  historial.push({telefono,recibir,fecha:new Date().toLocaleString()});
-  localStorage.setItem("historial",JSON.stringify(historial));
-  mostrarHistorial();
+
+
+function loadNotifications(){
+
+let list=JSON.parse(localStorage.notifications)
+
+notificationList.innerHTML=""
+
+list.reverse().forEach(n=>{
+
+notificationList.innerHTML+=`<div class="card">${n.message}<br><small>${n.date}</small></div>`
+
+})
+
 }
 
-function mostrarHistorial(){
-  let historial=JSON.parse(localStorage.getItem("historial"))||[];
-  let html="";
-  historial.forEach(h=>{
-    html+=`<p>${h.fecha} | ${h.telefono} | ${h.recibir}</p>`;
-  });
-  document.getElementById("historial").innerHTML=html;
+loadNotifications()
+
+
+
+function addTransaction(type,amount,status){
+
+let tx=JSON.parse(localStorage.transactions)
+
+tx.push({type,amount,status,date:new Date().toLocaleString()})
+
+localStorage.transactions=JSON.stringify(tx)
+
+loadTransactions()
+
 }
 
-function actualizarPanel(){
-  document.getElementById("ventas").innerHTML=ventas;
-  document.getElementById("disponibles").innerHTML=codigos.length-usados.length;
+
+
+function loadTransactions(){
+
+let tx=JSON.parse(localStorage.transactions)
+
+txTable.innerHTML=""
+
+tx.reverse().forEach(t=>{
+
+txTable.innerHTML+=`<tr><td>${t.type}</td><td>${t.amount}</td><td>${t.status}</td><td>${t.date}</td></tr>`
+
+})
+
 }
 
-function abrirAdmin(){
-  let pass = prompt("Introduce la contraseña del panel admin:");
-  if(pass==="daryallen99@gmail.com"){
-    document.getElementById("adminPanel").style.display="block";
-  } else {
-    alert("Contraseña incorrecta");
-  }
+loadTransactions()
+
+
+
+/* CONFIRMAR DEPOSITO */
+
+function confirmDeposit(){
+
+let code=Number(codeInput.value)
+
+let amount=Number(depositAmount.value)
+
+let codes=JSON.parse(localStorage.codes)
+
+let now=Date.now()
+
+let last=Number(localStorage.lastCodeUse)
+
+
+
+if(now-last < 72*60*60*1000){
+
+alert("Debes esperar 72 horas")
+
+return
+
 }
 
-function resetear(){
-  localStorage.clear();
-  location.reload();
+
+
+let item=codes.find(c=>c.code===code && !c.used)
+
+if(!item){
+
+alert("Código inválido")
+
+return
+
 }
 
-// ------------------ SORTEO ------------------
-function participarSorteo(){
-  let hash = document.getElementById("hash").value.trim();
-  if(!hash){
-    alert("Valida tu hash primero");
-    return;
-  }
-  if(hashesUsados.includes(hash)){
-    alert("Hash ya usado");
-    return;
-  }
 
-  let ganador = Math.random() < 0.33; // 33% chance
-  if(ganador){
-    let codigoSorteo = Math.floor(100000 + Math.random()*900000);
-    localStorage.setItem("codigoSorteo", codigoSorteo);
-    localStorage.setItem("hashSorteo", hash);
 
-    // Enviar código por correo usando SMTPJS
-    Email.send({
-      SecureToken : "YOUR_SECURE_TOKEN_HERE", // reemplaza con tu token SMTPJS real
-      To : 'criptochangep2p@gmail.com',
-      From : "sal2crypto@correo.com",
-      Subject : "Código Sorteo SAL2-CRYPTO",
-      Body : `¡Felicidades! Ganaste el sorteo. Tu código de activación es: ${codigoSorteo}`
-    }).then(
-      message => alert("¡Ganaste! Revisa el correo criptochangep2p@gmail.com para tu código")
-    );
-  } else {
-    alert("No ganaste esta vez. Intenta nuevamente.");
-  }
+item.used=true
 
-  hashesUsados.push(hash);
-  localStorage.setItem("hashesUsados", JSON.stringify(hashesUsados));
-  localStorage.removeItem("hashValidado");
+localStorage.codes=JSON.stringify(codes)
+
+localStorage.lastCodeUse=now
+
+
+
+let balance=Number(localStorage.wallet)
+
+balance+=amount
+
+localStorage.wallet=balance
+
+updateBalance()
+
+addTransaction("Deposito",amount,"Confirmado")
+
+addNotification("Deposito confirmado "+amount+" USDT")
+
+
+
+if(localStorage.bonus=="Bloqueado" && amount>=5){
+
+balance+=15
+
+localStorage.wallet=balance
+
+localStorage.bonus="Activo"
+
+updateBalance()
+
+addNotification("Bono activado +15 USDT")
+
 }
 
-function activarSorteo(){
-  let codigo = document.getElementById("codigo").value;
-  let codigoGuardado = localStorage.getItem("codigoSorteo");
-  let hashGuardado = localStorage.getItem("hashSorteo");
-  if(codigo == codigoGuardado){
-    document.getElementById("recibir").value = "3000 CUP (SORTEO)";
-    alert("Recarga de 3000 CUP activada por sorteo!");
-    localStorage.removeItem("codigoSorteo");
-    localStorage.removeItem("hashSorteo");
-  } else {
-    alert("Código incorrecto, revisa tu correo.");
-  }
 }
 
-mostrarHistorial();
-actualizarPanel();
+
+
+/* RETIRO */
+
+function withdraw(){
+
+let amount=Number(withdrawAmount.value)
+
+let balance=Number(localStorage.wallet)
+
+if(balance<amount)return alert("Saldo insuficiente")
+
+balance-=amount
+
+localStorage.wallet=balance
+
+updateBalance()
+
+addTransaction("Retiro interno",amount,"Completado")
+
+}
+
+
+
+function withdrawCrypto(){
+
+let amount=Number(withdrawCryptoAmount.value)
+
+let address=withdrawAddress.value
+
+let balance=Number(localStorage.wallet)
+
+if(balance<amount)return alert("Saldo insuficiente")
+
+balance-=amount
+
+localStorage.wallet=balance
+
+updateBalance()
+
+addTransaction("Retiro crypto",amount,"Procesando")
+
+alert("Retiro enviado a "+address)
+
+}
+
+
+
+function copyDeposit(){
+
+navigator.clipboard.writeText(SYSTEM_WALLET)
+
+alert("Dirección copiada")
+
+}
+
+
+
+/* TARJETA */
+
+function buyCard(){
+
+let balance=Number(localStorage.wallet)
+
+if(balance<3)return alert("Saldo insuficiente")
+
+balance-=3
+
+localStorage.wallet=balance
+
+let card={
+
+number:"QVA "+Math.floor(Math.random()*9999)+" "+Math.floor(Math.random()*9999)+" "+Math.floor(Math.random()*9999),
+
+exp:"12/28",
+
+cvv:Math.floor(Math.random()*900+100),
+
+balance:25,
+
+status:"Activa"
+
+}
+
+localStorage.card=JSON.stringify(card)
+
+loadCard()
+
+updateBalance()
+
+}
+
+
+
+function loadCard(){
+
+let card=JSON.parse(localStorage.card||"null")
+
+if(!card)return
+
+cardNumber.innerText=card.number
+cardExp.innerText=card.exp
+cardCvv.innerText=card.cvv
+cardBalance.innerText=card.balance
+cardStatus.innerText=card.status
+
+}
+
+loadCard()
+
+
+
+function lockCard(){
+
+let card=JSON.parse(localStorage.card)
+
+card.status="Bloqueada"
+
+localStorage.card=JSON.stringify(card)
+
+loadCard()
+
+}
+
+
+
+function unlockCard(){
+
+let card=JSON.parse(localStorage.card)
+
+card.status="Activa"
+
+localStorage.card=JSON.stringify(card)
+
+loadCard()
+
+}
+
+
+
+function deleteCard(){
+
+localStorage.removeItem("card")
+
+location.reload()
+
+}
+
+
+
+/* USUARIOS */
+
+function register(){
+
+let u=regUser.value
+let p=regPass.value
+
+let users=JSON.parse(localStorage.users)
+
+if(users[u])return alert("Usuario existe")
+
+users[u]=p
+
+localStorage.users=JSON.stringify(users)
+
+alert("Cuenta creada")
+
+showPage("login")
+
+}
+
+
+
+function login(){
+
+let u=loginUser.value
+let p=loginPass.value
+
+let users=JSON.parse(localStorage.users)
+
+if(users[u]!==p)return alert("Datos incorrectos")
+
+showPage("dashboard")
+
+}
+
+
+
+function logout(){
+
+showPage("login")
+
+}
+
 </script>
+
+
 </body>
-                                                                    </html>
+  </html>
