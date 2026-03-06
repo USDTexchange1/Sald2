@@ -1,208 +1,214 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Billetera Virtual</title>
+    <title>Bote de USDT</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #181818;
+            color: #fff;
             margin: 0;
             padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
         }
 
-        header {
-            background-color: #333;
-            color: white;
-            padding: 15px;
+        .container {
             text-align: center;
         }
 
-        main {
-            padding: 20px;
+        .circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: #292b2f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .wallet {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        .amount {
+            font-size: 30px;
+            font-weight: bold;
         }
 
-        .wallet h2,
-        .transactions h2 {
-            margin-bottom: 10px;
+        .buttons {
+            display: flex;
+            justify-content: space-evenly;
         }
 
         button {
-            background-color: #28a745;
+            background-color: #4CAF50;
             color: white;
-            padding: 10px;
+            padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: background-color 0.3s;
+            margin: 10px;
         }
 
         button:hover {
-            background-color: #218838;
+            background-color: #45a049;
         }
 
-        input {
-            padding: 10px;
+        #notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 128, 0, 0.8);
+            color: #fff;
+            padding: 10px 20px;
             border-radius: 5px;
-            width: 100%;
-            margin-top: 10px;
+            font-size: 16px;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
-        footer {
-            margin-top: 20px;
-            text-align: center;
+        .notification.show {
+            display: block;
+            opacity: 1;
         }
 
-        footer button {
-            background-color: #dc3545;
+        ul {
+            list-style-type: none;
+            padding: 0;
         }
 
-        footer button:hover {
-            background-color: #c82333;
+        li {
+            margin: 10px 0;
+            font-size: 18px;
         }
     </style>
 </head>
-
 <body>
-    <header>
-        <h1>Billetera Virtual</h1>
-    </header>
-    <main>
-        <section class="wallet">
-            <h2>Tu Saldo</h2>
-            <div id="balance">Cargando...</div>
-            <h3>Dirección de Depósito BEP20</h3>
-            <p id="depositAddress">0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e</p>
-            <label for="txid">Ingresa tu TXID:</label>
-            <input type="text" id="txid" placeholder="TXID">
-            <button onclick="verifyDeposit()">Verificar Depósito</button>
-            <button onclick="buyCard()">Comprar Tarjeta Virtual</button>
-        </section>
-        <section class="transactions">
-            <h2>Historial de Transacciones</h2>
-            <ul id="transactionHistory"></ul>
-        </section>
-    </main>
-    <footer>
-        <button onclick="logout()">Cerrar sesión</button>
-    </footer>
+    <div class="container">
+        <div class="circle">
+            <p class="amount" id="prize-amount">$93.00</p>
+        </div>
+        <div class="buttons">
+            <button id="participate-btn">Participar</button>
+            <button id="participants-btn">Ver Lista de Participantes</button>
+            <button id="rules-btn">Reglas del Sorteo</button>
+        </div>
+    </div>
+    <div id="notification" class="notification"></div> <!-- Contenedor de la notificación flotante -->
 
     <script>
-        // Registro de usuario
-        function register(event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        let participants = [
+            "Juan Pérez", "Ana González", "Carlos Rodríguez", "Luis Martínez", "Marta Fernández",
+            "Pedro López", "José García", "Isabel Martínez", "Raúl Sánchez", "Lucía Hernández",
+            "David Ramírez", "Elena Díaz"
+        ];
 
-            // Cifrado de contraseñas con bcrypt (simulado)
-            const encryptedPassword = password; // En un entorno real usar bcrypt
+        const validCodes = [
+            "1234", "5678", "9101", "1121", "3141", "5161", "7181", "9202", "2223", "3243",
+            "4263", "5283", "6303", "7323", "8343"
+        ];
 
-            const user = {
-                username,
-                password: encryptedPassword,
-                balance: 0,
-                transactions: [],
-                email: '',
-            };
+        let prizeAmount = 93;
 
-            // Guardar en localStorage
-            localStorage.setItem('user', JSON.stringify(user));
-
-            alert("Registro exitoso!");
-            window.location.href = 'login.html'; // Redirigir a la página de login
+        function showNotification(amountAdded) {
+            const notification = document.getElementById("notification");
+            notification.innerText = `¡Se ha agregado ${amountAdded} USDT al premio!`;
+            notification.classList.add("show");
+            setTimeout(() => {
+                notification.classList.remove("show");
+            }, 2000);
         }
 
-        // Login de usuario
-        function login(event) {
-            event.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+        function updatePrizeAmount() {
+            const prizeElement = document.getElementById("prize-amount");
+            const increments = [3, 6, 9, 3, 2, 1, 5, 8];
 
-            const user = JSON.parse(localStorage.getItem('user'));
-
-            if (user && user.username === username && user.password === password) {
-                alert("Inicio de sesión exitoso!");
-                window.location.href = 'index.html';  // Redirigir a la página principal
-            } else {
-                alert("Nombre de usuario o contraseña incorrectos.");
-            }
+            setInterval(() => {
+                const randomIncrement = increments[Math.floor(Math.random() * increments.length)];
+                prizeAmount += randomIncrement;
+                prizeElement.innerText = `$${prizeAmount.toFixed(2)}`;
+                showNotification(randomIncrement);
+            }, Math.floor(Math.random() * (300000 - 10000 + 1)) + 10000);
         }
 
-        // Verificación de depósito
-        function verifyDeposit() {
-            const txid = document.getElementById('txid').value;
-
-            // Simulación de verificación de TXID
-            if (txid === "validTXID") {
-                alert("Depósito confirmado. ¡Bono acreditado!");
-                // Actualizar saldo y transacciones
-                const user = JSON.parse(localStorage.getItem('user'));
-                user.balance += 15; // Acreditar bono
-                user.transactions.push({ type: "Bono", amount: 15, date: new Date() });
-                localStorage.setItem('user', JSON.stringify(user));
-                updateBalance();
-            } else {
-                alert("TXID no válido.");
-            }
-        }
-
-        // Comprar tarjeta virtual
-        function buyCard() {
-            const user = JSON.parse(localStorage.getItem('user'));
-
-            if (user.balance >= 3) {
-                setTimeout(() => {
-                    alert("¡Tu tarjeta virtual ha sido emitida!");
-                    user.balance -= 3;
-                    user.transactions.push({ type: "Compra de tarjeta", amount: 3, date: new Date() });
-                    localStorage.setItem('user', JSON.stringify(user));
-                    updateBalance();
-                }, 3 * 60 * 60 * 1000);  // Espera de 3 horas
-            } else {
-                alert("Saldo insuficiente para comprar una tarjeta.");
-            }
-        }
-
-        // Mostrar el saldo actualizado
-        function updateBalance() {
-            const user = JSON.parse(localStorage.getItem('user'));
-            document.getElementById('balance').innerText = `${user.balance} USDT`;
-            updateTransactionHistory();
-        }
-
-        // Mostrar el historial de transacciones
-        function updateTransactionHistory() {
-            const user = JSON.parse(localStorage.getItem('user'));
-            const transactionHistory = document.getElementById('transactionHistory');
-            transactionHistory.innerHTML = '';
-
-            user.transactions.forEach((transaction) => {
-                const li = document.createElement('li');
-                li.textContent = `${transaction.type} - ${transaction.amount} USDT - ${transaction.date}`;
-                transactionHistory.appendChild(li);
+        function loadParticipants() {
+            const listElement = document.getElementById("participants-list");
+            participants.forEach(participant => {
+                const li = document.createElement("li");
+                li.innerText = participant;
+                listElement.appendChild(li);
             });
         }
 
-        // Función de logout
-        function logout() {
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
+        function addParticipant(name) {
+            participants.push(name);
+            localStorage.setItem('participants', JSON.stringify(participants));
         }
 
-        // Al cargar la página, actualizar el balance y el historial
-        if (localStorage.getItem('user')) {
-            updateBalance();
+        function validateActivationCode(inputCode) {
+            const index = validCodes.indexOf(inputCode);
+            if (index !== -1) {
+                validCodes.splice(index, 1);
+                return true;
+            }
+            return false;
         }
+
+        document.getElementById("participate-btn").addEventListener("click", function() {
+            alert("Para participar, realiza un depósito de 3 USDT.");
+            window.location.href = 'confirmation.html';
+        });
+
+        document.getElementById("participants-btn").addEventListener("click", function() {
+            window.location.href = 'participants.html';
+        });
+
+        document.getElementById("rules-btn").addEventListener("click", function() {
+            window.location.href = 'rules.html';
+        });
+
+        document.getElementById("validate-hash-btn").addEventListener("click", function() {
+            const hash = document.getElementById("transaction-hash").value;
+            if (hash) {
+                localStorage.setItem('transactionHash', hash);
+                document.getElementById('hash-container').style.display = 'none';
+                document.getElementById('code-container').style.display = 'block';
+            } else {
+                alert('Por favor ingresa un hash de transacción válido.');
+            }
+        });
+
+        document.getElementById("confirm-btn").addEventListener("click", function() {
+            const code = document.getElementById("activation-code").value;
+            if (code && code.length === 4) {
+                if (validateActivationCode(code)) {
+                    localStorage.setItem('activationCode', code);
+                    alert('¡Participación confirmada! Gracias por participar.');
+                    sendConfirmationEmail();
+                    localStorage.removeItem('participating');
+                    window.location.href = 'index.html';
+                } else {
+                    alert('Código de activación incorrecto o ya ha sido usado. Inténtalo de nuevo.');
+                }
+            } else {
+                alert('Por favor ingresa un código de 4 dígitos válido.');
+            }
+        });
+
+        function sendConfirmationEmail() {
+            const message = `Estimado usuario,\n\nGracias por participar en el bote de USDT. Tu participación ha sido confirmada. Aquí están los detalles de tu participación:\n\nHash de transacción: ${localStorage.getItem('transactionHash')}\nCódigo de activación: ${localStorage.getItem('activationCode')}\n\n¡Buena suerte!`;
+
+            const mailtoLink = `mailto:criptochangep2p@gmail.com?subject=Confirmación de Participación&body=${encodeURIComponent(message)}`;
+            window.location.href = mailtoLink;
+        }
+
+        updatePrizeAmount();
     </script>
 </body>
-
 </html>
