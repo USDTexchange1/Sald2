@@ -29,7 +29,7 @@ align-items:center;
 position:fixed;
 left:0;
 top:0;
-width:220px;
+width:200px;
 height:100%;
 background:#020617;
 padding-top:70px;
@@ -50,8 +50,8 @@ background:#1e293b;
 }
 
 .main{
-margin-left:220px;
-padding:30px;
+margin-left:200px;
+padding:20px;
 }
 
 .card{
@@ -96,7 +96,7 @@ display:block;
 }
 
 .virtual-card{
-width:350px;
+width:320px;
 padding:25px;
 border-radius:14px;
 background:linear-gradient(135deg,#2563eb,#0ea5e9);
@@ -113,6 +113,27 @@ padding:10px;
 border-bottom:1px solid #334155;
 }
 
+@media(max-width:768px){
+
+.sidebar{
+width:160px;
+}
+
+.main{
+margin-left:160px;
+padding:10px;
+}
+
+.virtual-card{
+width:100%;
+}
+
+input{
+width:100%;
+}
+
+}
+
 </style>
 
 </head>
@@ -127,7 +148,6 @@ border-bottom:1px solid #334155;
 
 </header>
 
-
 <div class="sidebar">
 
 <button onclick="showPage('dashboard')">Dashboard</button>
@@ -140,15 +160,14 @@ border-bottom:1px solid #334155;
 
 </div>
 
-
 <div class="main">
 
-
-<!-- LOGIN -->
+<!-- BIENVENIDA -->
 
 <div id="login" class="page active">
 
-<h2>Login</h2>
+<h2>BIENVENIDOS A QVA-CREDIT</h2>
+<p>LA ALTERNATIVA SIN KYC PARA EL MUNDO</p>
 
 <input id="loginUser" placeholder="Usuario"><br>
 <input id="loginPass" type="password" placeholder="Contraseña"><br>
@@ -161,21 +180,22 @@ border-bottom:1px solid #334155;
 
 </div>
 
-
 <!-- REGISTRO -->
 
 <div id="register" class="page">
 
 <h2>Registro</h2>
 
+<input id="regName" placeholder="Nombre"><br>
+<input id="regLast" placeholder="Apellidos"><br>
+<input id="regAge" placeholder="Edad"><br>
+
 <input id="regUser" placeholder="Usuario"><br>
-<input id="regPass" type="password" placeholder="Contraseña"><br>
+<input id="regPass" type="password" placeholder="Contraseña segura"><br>
 
 <button class="btn" onclick="register()">Registrar</button>
 
 </div>
-
-
 
 <!-- DASHBOARD -->
 
@@ -193,15 +213,13 @@ Saldo Wallet
 
 <div class="card">
 
-Bono de registro
+Bono registro
 
 <p id="bonusStatus"></p>
 
 </div>
 
 </div>
-
-
 
 <!-- WALLET -->
 
@@ -217,70 +235,44 @@ Saldo actual
 
 </div>
 
-
 <div class="card">
 
 <h3>Depositar USDT</h3>
 
-<p>Dirección BEP20</p>
-
-<input id="depositAddress" value="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e" readonly>
-
-<br><br>
-
-<button class="btn" onclick="copyDeposit()">Copiar dirección</button>
+<input value="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e" readonly>
 
 <br><br>
 
 <input id="depositAmount" placeholder="Monto USDT">
+<input id="depositHash" placeholder="Hash transacción">
 
-<input id="depositHash" placeholder="Hash de transacción">
-
-<br>
-
-<a id="mailButton"
-href="mailto:criptochangep2p@gmail.com?subject=Confirmar%20Deposito&body=Usuario:%20%0AMonto:%20%0AHash:%20"
-class="btn">
-
-Enviar correo de confirmación
-
-</a>
-
-<br><br>
-
-<input id="codeInput" placeholder="Código de confirmación">
+<input id="codeInput" placeholder="Código confirmación">
 
 <button class="btn" onclick="confirmDeposit()">Confirmar depósito</button>
 
 </div>
 
+<div class="card">
+
+<h3>Agregar saldo a tarjeta</h3>
+
+<input id="addCardBalance" placeholder="Monto">
+
+<button class="btn" onclick="addBalanceCard()">Agregar</button>
+
+</div>
 
 <div class="card">
 
-<h3>Retirar interno</h3>
+<h3>Retirar saldo de tarjeta</h3>
 
-<input id="withdrawAmount" placeholder="Monto">
+<input id="removeCardBalance" placeholder="Monto">
 
-<button class="btn-danger" onclick="withdraw()">Retirar</button>
-
-</div>
-
-
-<div class="card">
-
-<h3>Retirar a otra wallet</h3>
-
-<input id="withdrawAddress" placeholder="Dirección destino">
-
-<input id="withdrawCryptoAmount" placeholder="Monto">
-
-<button class="btn-danger" onclick="withdrawCrypto()">Enviar</button>
+<button class="btn-danger" onclick="removeBalanceCard()">Retirar</button>
 
 </div>
 
 </div>
-
-
 
 <!-- TARJETA -->
 
@@ -292,13 +284,15 @@ Enviar correo de confirmación
 
 <h3>QVA-CREDIT</h3>
 
-<p id="cardNumber">----</p>
+<p id="cardHolder"></p>
+
+<p>Número <span id="cardNumber"></span></p>
 
 <p>Exp <span id="cardExp"></span></p>
 
 <p>CVV <span id="cardCvv"></span></p>
 
-<p>Saldo tarjeta <span id="cardBalance"></span></p>
+<p>Saldo <span id="cardBalance"></span></p>
 
 <p>Estado <span id="cardStatus"></span></p>
 
@@ -306,15 +300,9 @@ Enviar correo de confirmación
 
 <br>
 
-<button onclick="lockCard()">Bloquear</button>
-
-<button onclick="unlockCard()">Desbloquear</button>
-
-<button class="btn-danger" onclick="deleteCard()">Eliminar</button>
+<button onclick="toggleCard()">Mostrar/Ocultar datos</button>
 
 </div>
-
-
 
 <!-- COMPRAR TARJETA -->
 
@@ -323,14 +311,11 @@ Enviar correo de confirmación
 <h2>Comprar tarjeta</h2>
 
 <p>Costo 3 USDT</p>
-
 <p>Bono tarjeta 25 USDT</p>
 
 <button class="btn" onclick="buyCard()">Comprar tarjeta</button>
 
 </div>
-
-
 
 <!-- BONOS -->
 
@@ -338,17 +323,9 @@ Enviar correo de confirmación
 
 <h2>Bonos</h2>
 
-<div class="card">
-
-Bono registro 15 USDT
-
 <p id="bonusState"></p>
 
 </div>
-
-</div>
-
-
 
 <!-- TRANSACCIONES -->
 
@@ -371,8 +348,6 @@ Bono registro 15 USDT
 
 </div>
 
-
-
 <!-- NOTIFICACIONES -->
 
 <div id="notifications" class="page">
@@ -385,379 +360,58 @@ Bono registro 15 USDT
 
 </div>
 
-
-
 <script>
 
-/* WALLET SISTEMA */
+/* SISTEMA */
 
-const SYSTEM_WALLET="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e"
+const FIXED_CODES=[4821,7394,1560,9043,2678,5112,8304,6497,2915,7730,4086,1259,6621,3184,9472]
 
-
-
-/* CODIGOS FIJOS */
-
-const FIXED_CODES=[
-4821,7394,1560,9043,2678,
-5112,8304,6497,2915,7730,
-4086,1259,6621,3184,9472
-]
-
-
-
-if(!localStorage.codes){
-
-let codes=FIXED_CODES.map(c=>({code:c,used:false}))
-
-localStorage.codes=JSON.stringify(codes)
-
-}
-
-
-
-if(!localStorage.lastCodeUse){
-
-localStorage.lastCodeUse=0
-
-}
-
-
-
-/* STORAGE INICIAL */
-
-if(!localStorage.users)localStorage.users=JSON.stringify({})
 if(!localStorage.wallet)localStorage.wallet=20
+if(!localStorage.users)localStorage.users=JSON.stringify({})
 if(!localStorage.transactions)localStorage.transactions=JSON.stringify([])
 if(!localStorage.notifications)localStorage.notifications=JSON.stringify([])
 if(!localStorage.bonus)localStorage.bonus="Bloqueado"
 
-
-
 function showPage(page){
+
+if(!localStorage.session && page!="login" && page!="register"){
+alert("Debes iniciar sesión")
+return
+}
 
 document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"))
 
 document.getElementById(page).classList.add("active")
 
-}
-
-
-
-function updateBalance(){
-
-walletBalance.innerText=localStorage.wallet+" USDT"
-walletBalance2.innerText=localStorage.wallet+" USDT"
-bonusStatus.innerText=localStorage.bonus
-bonusState.innerText=localStorage.bonus
-
-}
-
-updateBalance()
-
-
-
-function addNotification(msg){
-
-let list=JSON.parse(localStorage.notifications)
-
-list.push({message:msg,date:new Date().toLocaleString()})
-
-localStorage.notifications=JSON.stringify(list)
-
-loadNotifications()
-
-}
-
-
-
-function loadNotifications(){
-
-let list=JSON.parse(localStorage.notifications)
-
-notificationList.innerHTML=""
-
-list.reverse().forEach(n=>{
-
-notificationList.innerHTML+=`<div class="card">${n.message}<br><small>${n.date}</small></div>`
-
-})
-
-}
-
-loadNotifications()
-
-
-
-function addTransaction(type,amount,status){
-
-let tx=JSON.parse(localStorage.transactions)
-
-tx.push({type,amount,status,date:new Date().toLocaleString()})
-
-localStorage.transactions=JSON.stringify(tx)
-
-loadTransactions()
-
-}
-
-
-
-function loadTransactions(){
-
-let tx=JSON.parse(localStorage.transactions)
-
-txTable.innerHTML=""
-
-tx.reverse().forEach(t=>{
-
-txTable.innerHTML+=`<tr><td>${t.type}</td><td>${t.amount}</td><td>${t.status}</td><td>${t.date}</td></tr>`
-
-})
-
-}
-
-loadTransactions()
-
-
-
-/* CONFIRMAR DEPOSITO */
-
-function confirmDeposit(){
-
-let code=Number(codeInput.value)
-
-let amount=Number(depositAmount.value)
-
-let codes=JSON.parse(localStorage.codes)
-
-let now=Date.now()
-
-let last=Number(localStorage.lastCodeUse)
-
-
-
-if(now-last < 72*60*60*1000){
-
-alert("Debes esperar 72 horas")
-
-return
-
-}
-
-
-
-let item=codes.find(c=>c.code===code && !c.used)
-
-if(!item){
-
-alert("Código inválido")
-
-return
-
-}
-
-
-
-item.used=true
-
-localStorage.codes=JSON.stringify(codes)
-
-localStorage.lastCodeUse=now
-
-
-
-let balance=Number(localStorage.wallet)
-
-balance+=amount
-
-localStorage.wallet=balance
-
-updateBalance()
-
-addTransaction("Deposito",amount,"Confirmado")
-
-addNotification("Deposito confirmado "+amount+" USDT")
-
-
-
-if(localStorage.bonus=="Bloqueado" && amount>=5){
-
-balance+=15
-
-localStorage.wallet=balance
-
-localStorage.bonus="Activo"
-
-updateBalance()
-
-addNotification("Bono activado +15 USDT")
-
-}
-
-}
-
-
-
-/* RETIRO */
-
-function withdraw(){
-
-let amount=Number(withdrawAmount.value)
-
-let balance=Number(localStorage.wallet)
-
-if(balance<amount)return alert("Saldo insuficiente")
-
-balance-=amount
-
-localStorage.wallet=balance
-
-updateBalance()
-
-addTransaction("Retiro interno",amount,"Completado")
-
-}
-
-
-
-function withdrawCrypto(){
-
-let amount=Number(withdrawCryptoAmount.value)
-
-let address=withdrawAddress.value
-
-let balance=Number(localStorage.wallet)
-
-if(balance<amount)return alert("Saldo insuficiente")
-
-balance-=amount
-
-localStorage.wallet=balance
-
-updateBalance()
-
-addTransaction("Retiro crypto",amount,"Procesando")
-
-alert("Retiro enviado a "+address)
-
-}
-
-
-
-function copyDeposit(){
-
-navigator.clipboard.writeText(SYSTEM_WALLET)
-
-alert("Dirección copiada")
-
-}
-
-
-
-/* TARJETA */
-
-function buyCard(){
-
-let balance=Number(localStorage.wallet)
-
-if(balance<3)return alert("Saldo insuficiente")
-
-balance-=3
-
-localStorage.wallet=balance
-
-let card={
-
-number:"QVA "+Math.floor(Math.random()*9999)+" "+Math.floor(Math.random()*9999)+" "+Math.floor(Math.random()*9999),
-
-exp:"12/28",
-
-cvv:Math.floor(Math.random()*900+100),
-
-balance:25,
-
-status:"Activa"
-
-}
-
-localStorage.card=JSON.stringify(card)
-
-loadCard()
-
 updateBalance()
 
 }
 
-
-
-function loadCard(){
-
-let card=JSON.parse(localStorage.card||"null")
-
-if(!card)return
-
-cardNumber.innerText=card.number
-cardExp.innerText=card.exp
-cardCvv.innerText=card.cvv
-cardBalance.innerText=card.balance
-cardStatus.innerText=card.status
-
-}
-
-loadCard()
-
-
-
-function lockCard(){
-
-let card=JSON.parse(localStorage.card)
-
-card.status="Bloqueada"
-
-localStorage.card=JSON.stringify(card)
-
-loadCard()
-
-}
-
-
-
-function unlockCard(){
-
-let card=JSON.parse(localStorage.card)
-
-card.status="Activa"
-
-localStorage.card=JSON.stringify(card)
-
-loadCard()
-
-}
-
-
-
-function deleteCard(){
-
-localStorage.removeItem("card")
-
-location.reload()
-
-}
-
-
-
-/* USUARIOS */
+/* REGISTRO */
 
 function register(){
 
-let u=regUser.value
-let p=regPass.value
+let name=regName.value
+let last=regLast.value
+let age=regAge.value
+let user=regUser.value
+let pass=regPass.value
+
+let regex=/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,}$/
+
+if(!regex.test(pass)){
+alert("Contraseña mínima 8 caracteres con mayúscula, minúscula y número")
+return
+}
 
 let users=JSON.parse(localStorage.users)
 
-if(users[u])return alert("Usuario existe")
+if(users[user]){
+alert("Usuario ya existe")
+return
+}
 
-users[u]=p
+users[user]={pass,name,last,age}
 
 localStorage.users=JSON.stringify(users)
 
@@ -767,7 +421,7 @@ showPage("login")
 
 }
 
-
+/* LOGIN */
 
 function login(){
 
@@ -776,22 +430,148 @@ let p=loginPass.value
 
 let users=JSON.parse(localStorage.users)
 
-if(users[u]!==p)return alert("Datos incorrectos")
+if(!users[u] || users[u].pass!==p){
+alert("Datos incorrectos")
+return
+}
+
+localStorage.session=u
 
 showPage("dashboard")
 
 }
 
-
+/* LOGOUT */
 
 function logout(){
+
+localStorage.removeItem("session")
 
 showPage("login")
 
 }
 
+/* BALANCE */
+
+function updateBalance(){
+
+walletBalance.innerText=localStorage.wallet+" USDT"
+walletBalance2.innerText=localStorage.wallet+" USDT"
+bonusStatus.innerText=localStorage.bonus
+bonusState.innerText=localStorage.bonus
+
+loadCard()
+
+}
+
+/* TARJETA */
+
+function buyCard(){
+
+let balance=Number(localStorage.wallet)
+
+if(balance<3){
+alert("Saldo insuficiente")
+return
+}
+
+balance-=3
+localStorage.wallet=balance
+
+let user=JSON.parse(localStorage.users)[localStorage.session]
+
+let card={
+holder:user.name+" "+user.last,
+number:Math.floor(Math.random()*9999999999999999),
+exp:"12/28",
+cvv:Math.floor(Math.random()*900+100),
+balance:25,
+status:"Activa",
+visible:true
+}
+
+localStorage.card=JSON.stringify(card)
+
+updateBalance()
+
+}
+
+function loadCard(){
+
+let card=JSON.parse(localStorage.card||"null")
+
+if(!card)return
+
+cardHolder.innerText=card.holder
+cardNumber.innerText=card.visible?card.number:"**** **** **** ****"
+cardExp.innerText=card.exp
+cardCvv.innerText=card.visible?card.cvv:"***"
+cardBalance.innerText=card.visible?card.balance:"***"
+cardStatus.innerText=card.status
+
+}
+
+function toggleCard(){
+
+let card=JSON.parse(localStorage.card)
+
+card.visible=!card.visible
+
+localStorage.card=JSON.stringify(card)
+
+loadCard()
+
+}
+
+/* SALDO TARJETA */
+
+function addBalanceCard(){
+
+let amount=Math.abs(Number(addCardBalance.value))
+
+let wallet=Number(localStorage.wallet)
+
+let card=JSON.parse(localStorage.card)
+
+if(wallet<amount){
+alert("Saldo insuficiente")
+return
+}
+
+wallet-=amount
+card.balance+=amount
+
+localStorage.wallet=wallet
+localStorage.card=JSON.stringify(card)
+
+updateBalance()
+
+}
+
+function removeBalanceCard(){
+
+let amount=Math.abs(Number(removeCardBalance.value))
+
+let wallet=Number(localStorage.wallet)
+
+let card=JSON.parse(localStorage.card)
+
+if(card.balance<amount){
+alert("Saldo insuficiente en tarjeta")
+return
+}
+
+card.balance-=amount
+wallet+=amount
+
+localStorage.wallet=wallet
+localStorage.card=JSON.stringify(card)
+
+updateBalance()
+
+}
+
 </script>
 
-
 </body>
-  </html>
+                            </html>
